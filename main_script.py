@@ -833,6 +833,10 @@ def open_chrome_instance(driver_path, profile_path, window_index, url=None):
                 print("Skipping remaining steps due to wallet key import failure")
                 return browser
 
+            # After importing wallet, navigate to Twitter
+            browser.get("https://x.com")
+            time.sleep(2)
+
             # Step 4: Twitter login
             auth_tokens = read_auth_tokens()
             if not auth_tokens:
