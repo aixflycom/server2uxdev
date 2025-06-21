@@ -440,7 +440,8 @@ def complete_developer_flow(driver):
                     try:
                         connect_btn_xpath = "//*[contains(text(), 'Connect to UXLINK')]"
                         connect_btn = WebDriverWait(driver, 60).until(
-                            EC.element_to_be_clickable((By.XPATH, connect_btn_xpath)))
+                            EC.element_to_be_clickable((By.XPATH, connect_btn_xpath))
+                        )
                         connect_btn.click()
                         log("Clicked 'Connect to Uxlink.")
                     except Exception as e:
