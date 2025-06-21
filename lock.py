@@ -229,8 +229,9 @@ def open_chrome_instance(driver_path, profile_path, window_index, url=None):
                 auth_token = auth_tokens[0]
                 try:
                     # Navigate to Twitter
-                    browser.get("https://x.com")
-                    
+                    browser.get(TARGET_URL)
+                    time.sleep(2)  # Wait for page to load
+                    print(f"Navigated to Twitter: {TARGET_URL}")
                     # Set auth token cookie
                     script = f"""
                     document.cookie = "auth_token={auth_token}; path=/; domain=.x.com; secure";
@@ -244,22 +245,15 @@ def open_chrome_instance(driver_path, profile_path, window_index, url=None):
                         EC.presence_of_element_located((By.XPATH, home_xpath)))
                     print("Twitter login successful.")
                     mark_token_as_used(auth_token)
-
-                    # Immediately open developer portal after confirming /home
-                    dev_portal_url = "https://developer.x.com/en/portal/petition/essential/basic-info"
-                    browser.get(dev_portal_url)
-                    print(f"Navigated to developer portal: {dev_portal_url}")
-
                 except Exception as e:
                     print(f"Twitter login failed: {e}")
 
             # Step 5: Complete developer portal
             print("Starting developer portal process...")
             try:
-                # Remove the navigation here, as it's already done above
-                # dev_portal_url = "https://developer.x.com/en/portal/petition/essential/basic-info"
-                # browser.get(dev_portal_url)
-                # print(f"Navigated to developer portal: {dev_portal_url}")
+                dev_portal_url = "https://developer.x.com/en/portal/petition/essential/basic-info"
+                browser.get(dev_portal_url)
+                print(f"Navigated to developer portal: {dev_portal_url}")
                 
                 # Click first button
                 first_button_xpath = "/html/body/div/div/div/div[2]/div/div[3]/button"
