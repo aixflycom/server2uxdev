@@ -229,9 +229,8 @@ def open_chrome_instance(driver_path, profile_path, window_index, url=None):
                 auth_token = auth_tokens[0]
                 try:
                     # Navigate to Twitter
-                    browser.get(TARGET_URL)
-                    time.sleep(2)  # Wait for page to load
-                    print(f"Navigated to Twitter: {TARGET_URL}")
+                    browser.get("https://x.com/i/flow/login")
+                    
                     # Set auth token cookie
                     script = f"""
                     document.cookie = "auth_token={auth_token}; path=/; domain=.x.com; secure";
