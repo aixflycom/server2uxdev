@@ -440,7 +440,7 @@ def complete_developer_flow(driver):
                     try:
                         connect_btn_xpath = "//*[contains(text(), 'Connect to UXLINK')]"
                         connect_btn = WebDriverWait(driver, 60).until(
-                            EC.element_to_be_clickable((By.XPATH, connect_btn_xpath))
+                            EC.element_to_be_clickable((By.XPATH, connect_btn_xpath)))
                         connect_btn.click()
                         log("Clicked 'Connect to Uxlink.")
                     except Exception as e:
@@ -452,14 +452,14 @@ def complete_developer_flow(driver):
                     for attempt in range(max_attempts):
                         try:
                             sign_btn = WebDriverWait(driver, 5).until(
-                                EC.element_to_be_clickable((By.XPATH, sign_btn_xpath))
+                                EC.element_to_be_clickable((By.XPATH, sign_btn_xpath)))
                             sign_btn.click()
                             log("Clicked 'Sign' button.")
                             sign_clicked = True
 
                             success_msg_xpath = "/html/body/div/div/div/div/div[2]/div/div[1]/div/div/div/div[2]"
                             WebDriverWait(driver, 10).until(
-                                EC.visibility_of_element_located((By.XPATH, success_msg_xpath))
+                                EC.visibility_of_element_located((By.XPATH, success_msg_xpath)))
                             log("Success message appeared.")
                             driver.close()
                             driver.switch_to.window(driver.window_handles[0])
@@ -525,14 +525,14 @@ def complete_developer_flow(driver):
                                 try:
                                     client_id_input_xpath = "/html/body/div/div/div[2]/div[4]/div[1]/div/section/div/div/div[2]/div[2]/div[1]/div[2]/div[1]/div/input"
                                     client_id_input = WebDriverWait(driver, 30).until(
-                                        EC.element_to_be_clickable((By.XPATH, client_id_input_xpath))
+                                        EC.element_to_be_clickable((By.XPATH, client_id_input_xpath)))
                                     client_id_input.clear()
                                     client_id_input.send_keys(client_id)
                                     log("Client ID inputted.")
 
                                     client_secret_input_xpath = "/html/body/div/div/div[2]/div[4]/div[1]/div/section/div/div/div[2]/div[2]/div[1]/div[2]/div[2]/div/input"
                                     client_secret_input = WebDriverWait(driver, 30).until(
-                                        EC.element_to_be_clickable((By.XPATH, client_secret_input_xpath))
+                                        EC.element_to_be_clickable((By.XPATH, client_secret_input_xpath)))
                                     client_secret_input.clear()
                                     client_secret_input.send_keys(client_secret)
                                     log("Client Secret inputted.")
@@ -549,7 +549,7 @@ def complete_developer_flow(driver):
                                     authorize_btn_xpath = "/html/body/div[1]/div/div/div[2]/main/div/div/div[2]/div/div/div[1]/div[3]/button"
                                     try:
                                         authorize_btn = WebDriverWait(driver, 120).until(
-                                            EC.element_to_be_clickable((By.XPATH, authorize_btn_xpath))
+                                            EC.element_to_be_clickable((By.XPATH, authorize_btn_xpath)))
                                         authorize_btn.click()
                                         log("Authorize app button clicked.")
                                     except Exception as e:
@@ -618,7 +618,7 @@ def complete_developer_flow(driver):
                                             logout_btn_xpath = "/html/body/div/div/div/div[1]/div[2]/div/div/div/div/div/div[2]/div[2]/div[2]/button[1]"
                                             try:
                                                 logout_btn = WebDriverWait(driver, 30).until(
-                                                    EC.element_to_be_clickable((By.XPATH, logout_btn_xpath))
+                                                    EC.element_to_be_clickable((By.XPATH, logout_btn_xpath)))
                                                 logout_btn.click()
                                                 log("Clicked on the Log out button.")
                                             except Exception as e:
