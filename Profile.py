@@ -845,6 +845,16 @@ def open_chrome_instance(driver_path, profile_path, window_index, url=None):
                 # Step 5: Complete developer portal
                 if complete_developer_portal(browser):
                     print("All steps completed successfully!")
+                    # Close the browser
+                    browser.quit()
+                    print("Browser closed.")
+
+                    # Re-open with new key (recursive call)
+                    driver_path = chromedriver_paths[0]
+                    profile_path = chrome_profiles[0]
+                    url = read_url_from_file("desk/unlocked.txt")
+                    open_chrome_instance(driver_path, profile_path, 0, url)
+                    return  # Exit after re-opening
                 else:
                     print("Developer portal process failed")
             else:
@@ -859,18 +869,7 @@ if __name__ == "__main__":
     driver_path = chromedriver_paths[0]
     profile_path = chrome_profiles[0]
     url = read_url_from_file("desk/unlocked.txt")
-    
-    if not url:
-        print("No URL found in unlocked.txt")
-        sys.exit(1)
-    
-    while True:
-        browser = open_chrome_instance(driver_path, profile_path, 0, url)
-        if browser:
-            
-            browser.quit()
-            print("Browser closed. Waiting 3 seconds before restarting process...")
-            time.sleep(3)
-        else:
-            print("Failed to start browser. Retrying in 3 seconds...")
-            time.sleep(3)
+    open_chrome_instance(driver_path, profile_path, 0, url)
+
+    # Prevent the script from closing the browser automatically
+    input("Press Enter to exit and close the browser...")
