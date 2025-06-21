@@ -48,7 +48,7 @@ USED_TOKENS_FILE = os.path.join(SCRIPT_DIR, "desk/used_auth.txt")
 TARGET_URL = "https://x.com"
 
 # Define paths
-chromebrowser_paths = [r"desk\chromebrowser.exe"]
+chromebrowser_paths = [r"desk\chromedriver.exe"]
 chrome_profiles = [fr"C:\Users\{windows_username}\AppData\Local\Google\Chrome\User Data\Profile {profile_number}"]
 
 def read_url_from_file(file_path):
