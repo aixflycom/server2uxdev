@@ -228,41 +228,38 @@ def open_chrome_instance(driver_path, profile_path, window_index, url=None):
             else:
                 auth_token = auth_tokens[0]
                 try:
-                    # Open x.com/home to set the cookie in the correct context
-                    browser.get("https://x.com/home")
-                    time.sleep(2)  # Wait for the page to load
-
-                    # Set auth token cookie and reload
-                    browser.add_cookie({
-                        'name': 'auth_token',
-                        'value': auth_token,
-                        'domain': '.x.com',
-                        'path': '/',
-                        'secure': True
-                    })
-                    browser.get("https://x.com/home")
-                    time.sleep(2)  # Wait for the page to load with the new cookie
-
-                    print("Auth token cookie set and page refreshed.")
-
-                    # Verify login by checking for the home link or user avatar
+                    # Navigate to Twitter
+                    browser.get("https://x.com")
+                    
+                    # Set auth token cookie
+                    script = f"""
+                    document.cookie = "auth_token={auth_token}; path=/; domain=.x.com; secure";
+                    location.reload();
+                    """
+                    browser.execute_script(script)
+                    
+                    # Verify login
                     home_xpath = "//a[@href='/home']"
-                    try:
-                        WebDriverWait(browser, 20).until(
-                            EC.presence_of_element_located((By.XPATH, home_xpath)))
-                        print("Twitter login successful.")
-                        mark_token_as_used(auth_token)
-                    except TimeoutException:
-                        print("Login not successful, still on login page or redirected.")
+                    WebDriverWait(browser, 20).until(
+                        EC.presence_of_element_located((By.XPATH, home_xpath)))
+                    print("Twitter login successful.")
+                    mark_token_as_used(auth_token)
+
+                    # Immediately open developer portal after confirming /home
+                    dev_portal_url = "https://developer.x.com/en/portal/petition/essential/basic-info"
+                    browser.get(dev_portal_url)
+                    print(f"Navigated to developer portal: {dev_portal_url}")
+
                 except Exception as e:
                     print(f"Twitter login failed: {e}")
 
             # Step 5: Complete developer portal
             print("Starting developer portal process...")
             try:
-                dev_portal_url = "https://developer.x.com/en/portal/petition/essential/basic-info"
-                browser.get(dev_portal_url)
-                print(f"Navigated to developer portal: {dev_portal_url}")
+                # Remove the navigation here, as it's already done above
+                # dev_portal_url = "https://developer.x.com/en/portal/petition/essential/basic-info"
+                # browser.get(dev_portal_url)
+                # print(f"Navigated to developer portal: {dev_portal_url}")
                 
                 # Click first button
                 first_button_xpath = "/html/body/div/div/div/div[2]/div/div[3]/button"
