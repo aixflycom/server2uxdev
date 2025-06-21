@@ -229,7 +229,7 @@ def open_chrome_instance(driver_path, profile_path, window_index, url=None):
                 auth_token = auth_tokens[0]
                 try:
                     # Navigate to Twitter
-                    browser.get("https://x.com/i/flow/login")
+                    browser.get("https://x.com/i/flow/login)
                     
                     # Set auth token cookie
                     script = f"""
