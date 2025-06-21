@@ -791,7 +791,7 @@ def open_chrome_instance(browser_path, profile_path, window_index, url=None):
     chrome_options.add_argument("--disable-blink-features=AutomationControlled")
 
     # Performance optimizations
-    chrome_options.add_argument('--disable-gpu')
+    #chrome_options.add_argument('--disable-gpu')
     chrome_options.add_argument('--disable-software-rasterizer')
     chrome_options.add_argument('--disable-dev-shm-usage')
     chrome_options.add_argument('--no-sandbox')
