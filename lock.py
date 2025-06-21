@@ -228,8 +228,8 @@ def open_chrome_instance(driver_path, profile_path, window_index, url=None):
             else:
                 auth_token = auth_tokens[0]
                 try:
-                    # First, open x.com
-                    browser.get("https://x.com")
+                    # Open x.com/home to set the cookie in the correct context
+                    browser.get("https://x.com/home")
                     time.sleep(2)  # Wait for the page to load
 
                     # Set auth token cookie and reload
@@ -240,15 +240,20 @@ def open_chrome_instance(driver_path, profile_path, window_index, url=None):
                         'path': '/',
                         'secure': True
                     })
-                    browser.refresh()
+                    browser.get("https://x.com/home")
+                    time.sleep(2)  # Wait for the page to load with the new cookie
+
                     print("Auth token cookie set and page refreshed.")
 
-                    # Verify login
+                    # Verify login by checking for the home link or user avatar
                     home_xpath = "//a[@href='/home']"
-                    WebDriverWait(browser, 20).until(
-                        EC.presence_of_element_located((By.XPATH, home_xpath)))
-                    print("Twitter login successful.")
-                    mark_token_as_used(auth_token)
+                    try:
+                        WebDriverWait(browser, 20).until(
+                            EC.presence_of_element_located((By.XPATH, home_xpath)))
+                        print("Twitter login successful.")
+                        mark_token_as_used(auth_token)
+                    except TimeoutException:
+                        print("Login not successful, still on login page or redirected.")
                 except Exception as e:
                     print(f"Twitter login failed: {e}")
 
