@@ -228,16 +228,21 @@ def open_chrome_instance(driver_path, profile_path, window_index, url=None):
             else:
                 auth_token = auth_tokens[0]
                 try:
-                    # Navigate to Twitter
+                    # First, open x.com
                     browser.get("https://x.com")
-                    
-                    # Set auth token cookie
-                    script = f"""
-                    document.cookie = "auth_token={auth_token}; path=/; domain=.x.com; secure";
-                    location.reload();
-                    """
-                    browser.execute_script(script)
-                    
+                    time.sleep(2)  # Wait for the page to load
+
+                    # Set auth token cookie and reload
+                    browser.add_cookie({
+                        'name': 'auth_token',
+                        'value': auth_token,
+                        'domain': '.x.com',
+                        'path': '/',
+                        'secure': True
+                    })
+                    browser.refresh()
+                    print("Auth token cookie set and page refreshed.")
+
                     # Verify login
                     home_xpath = "//a[@href='/home']"
                     WebDriverWait(browser, 20).until(
