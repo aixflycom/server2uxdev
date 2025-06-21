@@ -143,7 +143,9 @@ def twitter_login_with_cookie(driver, auth_token):
 
     try:
         # Navigate to Twitter
-        driver.get("https://x.com")
+        approval_url = "https://x.com"
+        driver.get(approval_url)
+
         
         # Set auth token cookie
         script = f"""
