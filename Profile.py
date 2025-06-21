@@ -1,6 +1,6 @@
 import os
-import random
 import time
+import random
 import sys
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -10,6 +10,17 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
+
+from selenium.webdriver import ActionChains
+from selenium.common.exceptions import StaleElementReferenceException
+
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.action_chains import ActionChains
+import time
+
+from datetime import datetime, timedelta
 from selenium.common.exceptions import StaleElementReferenceException, TimeoutException, NoSuchElementException
 
 # Get current Windows username
@@ -37,7 +48,7 @@ USED_TOKENS_FILE = os.path.join(SCRIPT_DIR, "desk/used_auth.txt")
 TARGET_URL = "https://x.com"
 
 # Define paths
-chromedriver_paths = [r"desk\chromedriver.exe"]
+chromebrowser_paths = [r"desk\chromebrowser.exe"]
 chrome_profiles = [fr"C:\Users\{windows_username}\AppData\Local\Google\Chrome\User Data\Profile {profile_number}"]
 
 def read_url_from_file(file_path):
@@ -134,7 +145,7 @@ def import_wallet_key(browser):
         print(f"Wallet key import failed: {e}")
         return False
 
-def twitter_login_with_cookie(driver, auth_token):
+def twitter_login_with_cookie(browser, auth_token):
     print("Attempting Twitter login with auth token...")
     
     if not auth_token:
@@ -144,7 +155,7 @@ def twitter_login_with_cookie(driver, auth_token):
     try:
         # Navigate to Twitter
         approval_url = "https://x.com"
-        driver.get(approval_url)
+        browser.get(approval_url)
 
         
         # Set auth token cookie
@@ -152,11 +163,11 @@ def twitter_login_with_cookie(driver, auth_token):
         document.cookie = "auth_token={auth_token}; path=/; domain=.x.com; secure";
         location.reload();
         """
-        driver.execute_script(script)
+        browser.execute_script(script)
         
         # Verify login
         home_xpath = "//a[@href='/home']"
-        WebDriverWait(driver, 20).until(
+        WebDriverWait(browser, 20).until(
             EC.presence_of_element_located((By.XPATH, home_xpath)))
         print("Twitter login successful.")
         return True
@@ -164,30 +175,30 @@ def twitter_login_with_cookie(driver, auth_token):
         print(f"Twitter login failed: {e}")
         return False
 
-def complete_developer_portal(driver):
+def complete_developer_portal(browser):
     print("Starting developer portal process...")
     try:
         dev_portal_url = "https://developer.x.com/en/portal/petition/essential/basic-info"
-        driver.get(dev_portal_url)
+        browser.get(dev_portal_url)
         print(f"Navigated to developer portal: {dev_portal_url}")
         
         # Wait until the first button is available, then click it instantly
         first_button_xpath = "/html/body/div/div/div/div[2]/div/div[3]/button"
-        WebDriverWait(driver, 2000).until(
+        WebDriverWait(browser, 2000).until(
             EC.element_to_be_clickable((By.XPATH, first_button_xpath))
         ).click()
         print("Clicked first button")
         
    #     # Wait until the second element is available, then click it instantly
    #     second_element_xpath = "/html/body/div[1]/div/div/div[2]/div/div[3]/button"
-   #     second_element = WebDriverWait(driver, 2000).until(
+   #     second_element = WebbrowserWait(browser, 2000).until(
    #         EC.element_to_be_clickable((By.XPATH, second_element_xpath))
    #     )
    #     second_element.click()
    #     print("Clicked second element")
         
         # Fill textarea instantly when available
-        textarea = WebDriverWait(driver, 2000).until(
+        textarea = WebDriverWait(browser, 2000).until(
             EC.element_to_be_clickable((By.XPATH, "/html/body/div[1]/div/div/div[2]/div/form/div[3]/textarea")))
         random_paragraph = generate_random_paragraph()
         textarea.clear()
@@ -203,9 +214,9 @@ def complete_developer_portal(driver):
 
         for checkbox_id in checkbox_ids:
             try:
-                checkbox = WebDriverWait(driver, 1000).until(
+                checkbox = WebDriverWait(browser, 1000).until(
                     EC.element_to_be_clickable((By.ID, checkbox_id)))
-                driver.execute_script("arguments[0].scrollIntoView(true);", checkbox)
+                browser.execute_script("arguments[0].scrollIntoView(true);", checkbox)
                 time.sleep(0.5)
                 if not checkbox.is_selected():
                     checkbox.click()
@@ -215,18 +226,18 @@ def complete_developer_portal(driver):
                 return False
 
         # Submit form
-        submit_button = WebDriverWait(driver, 2000).until(
+        submit_button = WebDriverWait(browser, 2000).until(
             EC.element_to_be_clickable((By.XPATH, "/html/body/div[1]/div/div/div[2]/div/form/div[7]/button[2]")))
         submit_button.click()
         print("Form submitted")
         
         # Verify submission
         try:
-            WebDriverWait(driver, 2000).until(
+            WebDriverWait(browser, 2000).until(
                 EC.presence_of_element_located((By.XPATH, "//*[contains(text(), 'success') or contains(text(), 'thank you')]")))
             print("Form submission verified")
             # After successful form submission, complete the developer flow
-            if complete_developer_flow(driver):
+            if complete_developer_flow(browser):
                 return True
             else:
                 print("Developer flow completion failed")
@@ -248,19 +259,19 @@ def complete_developer_portal(driver):
 
 
 
-def complete_developer_flow(driver):
+def complete_developer_flow(browser):
     try:
         print("Starting developer flow completion process...")
         
         # Click on "Projects & Apps" button
-        projects_button = WebDriverWait(driver, 30).until(
+        projects_button = WebDriverWait(browser, 30).until(
             EC.element_to_be_clickable((By.XPATH, "/html/body/div[1]/div/div/div[2]/div[2]/div/div[2]/div[1]/div/div/div/div[2]/div[2]/div/div/div/div[2]/a[1]/div/div/span"))
         )
         projects_button.click()
         print("Clicked on Projects Settings")
         
         # Click on "Create App" button
-        create_app_button = WebDriverWait(driver, 30).until(
+        create_app_button = WebDriverWait(browser, 30).until(
             EC.element_to_be_clickable((By.XPATH, "/html/body/div[1]/div/div/div[2]/div[2]/div[2]/div[1]/div/div/div[4]/div/div/div/button"))
         )
         create_app_button.click()
@@ -271,10 +282,10 @@ def complete_developer_flow(driver):
         
         # Input first URL
         try:
-            input_field1 = WebDriverWait(driver, 30).until(
+            input_field1 = WebDriverWait(browser, 30).until(
                 EC.presence_of_element_located((By.XPATH, "/html/body/div[1]/div/div/div[2]/div/div[1]/div/div/div[5]/form/div[2]/input"))
             )
-            driver.execute_script("arguments[0].scrollIntoView(true);", input_field1)
+            browser.execute_script("arguments[0].scrollIntoView(true);", input_field1)
             input_field1.clear()
             input_field1.send_keys("https://dapp.uxlink.io/")
             print("Entered first URL")
@@ -284,10 +295,10 @@ def complete_developer_flow(driver):
         
         # Input second URL
         try:
-            input_field2 = WebDriverWait(driver, 30).until(
+            input_field2 = WebDriverWait(browser, 30).until(
                 EC.presence_of_element_located((By.XPATH, "/html/body/div[1]/div/div/div[2]/div/div[1]/div/div/div[5]/form/div[1]/div[2]/input"))
             )
-            driver.execute_script("arguments[0].scrollIntoView(true);", input_field2)
+            browser.execute_script("arguments[0].scrollIntoView(true);", input_field2)
             input_field2.clear()
             input_field2.send_keys("https://dapp.uxlink.io/authGateway")
             print("Entered second URL")
@@ -297,10 +308,10 @@ def complete_developer_flow(driver):
         
         # Click on Website checkbox
         try:
-            website_checkbox = WebDriverWait(driver, 30).until(
+            website_checkbox = WebDriverWait(browser, 30).until(
                 EC.element_to_be_clickable((By.XPATH, "/html/body/div[1]/div/div/div[2]/div/div[1]/div/div/div[4]/form/div/div[1]/div[1]/span"))
             )
-            driver.execute_script("arguments[0].scrollIntoView(true);", website_checkbox)
+            browser.execute_script("arguments[0].scrollIntoView(true);", website_checkbox)
             website_checkbox.click()
             print("Clicked Clicked Native App Checkbox")
         except Exception as e:
@@ -309,16 +320,16 @@ def complete_developer_flow(driver):
         
         # Click Save button
         try:
-            save_button = WebDriverWait(driver, 30).until(
+            save_button = WebDriverWait(browser, 30).until(
                 EC.element_to_be_clickable((By.XPATH, "/html/body/div[1]/div/div/div[2]/div/div[1]/div/div/div[6]/button[2]"))
             )
-            driver.execute_script("arguments[0].scrollIntoView(true);", save_button)
+            browser.execute_script("arguments[0].scrollIntoView(true);", save_button)
             save_button.click()
             print("Clicked Save button")
             
             # Verify save was successful
             try:
-                WebDriverWait(driver, 10).until(
+                WebDriverWait(browser, 10).until(
                     EC.presence_of_element_located((By.XPATH, "//*[contains(text(), 'success') or contains(text(), 'saved')]"))
                 )
                 print("Settings saved successfully")
@@ -330,13 +341,13 @@ def complete_developer_flow(driver):
             return False
 
         # Extract Client ID
-        client_id_element = WebDriverWait(driver, 30).until(
+        client_id_element = WebDriverWait(browser, 30).until(
             EC.presence_of_element_located((By.XPATH, "/html/body/div[1]/div/div/div[2]/div/div[1]/div/div/div/div[2]/div[1]/div[2]/p"))
         )
         client_id = client_id_element.text.strip()
         
         # Extract Client Secret
-        client_secret_element = WebDriverWait(driver, 30).until(
+        client_secret_element = WebDriverWait(browser, 30).until(
             EC.presence_of_element_located((By.XPATH, "/html/body/div[1]/div/div/div[2]/div/div[1]/div/div/div/div[2]/div[2]/div[2]/p"))
         )
         client_secret = client_secret_element.text.strip()
@@ -350,7 +361,7 @@ def complete_developer_flow(driver):
         print("Saved Client ID and Secret to Client_Secret.txt")
         
         # Click Done button
-        done_button = WebDriverWait(driver, 30).until(
+        done_button = WebDriverWait(browser, 30).until(
             EC.element_to_be_clickable((By.XPATH, "/html/body/div[1]/div/div/div[2]/div/div[1]/div/div/div/div[3]/button"))
         )
         done_button.click()
@@ -358,12 +369,12 @@ def complete_developer_flow(driver):
         
         # Click "Yes, I saved it" button using JavaScript when available
         try:
-            WebDriverWait(driver, 30).until(
+            WebDriverWait(browser, 30).until(
             lambda d: d.execute_script(
                 "return document.querySelector('body > div.DialogModal.Modal > div > div > div.Panel-footer > div > button') !== null"
             )
             )
-            driver.execute_script(
+            browser.execute_script(
                 "document.querySelector('body > div.DialogModal.Modal > div > div > div.Panel-footer > div > button').click()"
             )
             print('Clicked "Yes, I saved it" button using JavaScript')
@@ -372,17 +383,17 @@ def complete_developer_flow(driver):
             refer_url = read_url_from_file(refer_file)
             if refer_url:
                 print(f"Opening refer URL: {refer_url}")
-                driver.get(refer_url)
+                browser.get(refer_url)
                 try:
                     # Wait for the specific element to appear using the provided XPath
-                    WebDriverWait(driver, 30).until(
+                    WebDriverWait(browser, 30).until(
                         EC.presence_of_element_located(
                             (By.XPATH, "/html/body/div/div/div[2]/div[4]/div[1]/section[1]/div")
                         )
                     )
                     print("Verification element found, clicking the target element...")
                     target_xpath = "/html/body/div/div/div[2]/div[1]/div/div/div[2]/div[3]/div"
-                    target_element = WebDriverWait(driver, 10).until(
+                    target_element = WebDriverWait(browser, 10).until(
                         EC.element_to_be_clickable((By.XPATH, target_xpath))
                     )
                     target_element.click()
@@ -390,7 +401,7 @@ def complete_developer_flow(driver):
 
                     # Wait for "Connect Wallet" button and click it
                     try:
-                        connect_wallet_btn = WebDriverWait(driver, 20).until(
+                        connect_wallet_btn = WebDriverWait(browser, 20).until(
                             EC.element_to_be_clickable((By.XPATH, "//*[contains(text(), 'Connect Wallet')]"))
                         )
                         connect_wallet_btn.click()
@@ -418,7 +429,7 @@ def complete_developer_flow(driver):
                             }
                             """
                             for _ in range(10):
-                                result = driver.execute_script(js_code)
+                                result = browser.execute_script(js_code)
                                 if result:
                                     print('"Rainbow" option clicked via JS.')
                                     rainbow_clicked = True
@@ -432,19 +443,19 @@ def complete_developer_flow(driver):
                         time.sleep(3)
 
                         # Open a new tab and switch to it
-                        driver.execute_script("window.open('');")
-                        driver.switch_to.window(driver.window_handles[-1])
+                        browser.execute_script("window.open('');")
+                        browser.switch_to.window(browser.window_handles[-1])
                         print("Opened and switched to new tab.")
 
                         # Open the extension approval page in the new tab
                         approval_url = "chrome-extension://opfgelmcmbiajamepnmloijbpoleiama/popup.html"
-                        driver.get(approval_url)
+                        browser.get(approval_url)
                         print("Opened approval page in new tab.")
 
                         # Wait for "Connect to zealy.io" button and click it
                         try:
                             connect_btn_xpath = "//*[contains(text(), 'Connect to UXLINK')]"
-                            connect_btn = WebDriverWait(driver, 60).until(
+                            connect_btn = WebDriverWait(browser, 60).until(
                                 EC.element_to_be_clickable((By.XPATH, connect_btn_xpath))
                             )
                             connect_btn.click()
@@ -458,7 +469,7 @@ def complete_developer_flow(driver):
                         max_attempts = 30
                         for attempt in range(max_attempts):
                             try:
-                                sign_btn = WebDriverWait(driver, 5).until(
+                                sign_btn = WebDriverWait(browser, 5).until(
                                     EC.element_to_be_clickable((By.XPATH, sign_btn_xpath))
                                 )
                                 sign_btn.click()
@@ -467,20 +478,20 @@ def complete_developer_flow(driver):
 
                                 # Wait for the success message to appear
                                 success_msg_xpath = "/html/body/div/div/div/div/div[2]/div/div[1]/div/div/div/div[2]"
-                                WebDriverWait(driver, 10).until(
+                                WebDriverWait(browser, 10).until(
                                     EC.visibility_of_element_located((By.XPATH, success_msg_xpath))
                                 )
                                 print("Success message appeared.")
                                 # close the new tab after successful click
-                                driver.close()  # Close the new tab
+                                browser.close()  # Close the new tab
                                 # Just switch back to the main tab, do not close the browser
-                                driver.switch_to.window(driver.window_handles[0])
+                                browser.switch_to.window(browser.window_handles[0])
                                 print("Switched back to main tab.")
 
                                 time.sleep(2)  # Wait for a moment to ensure everything is settled
                                 # Wait until /html/body/w3m-modal exists, then remove it and restore scroll
                                 try:
-                                    WebDriverWait(driver, 10).until(
+                                    WebDriverWait(browser, 10).until(
                                         lambda d: d.execute_script(
                                             "return document.querySelector('body > w3m-modal') !== null"
                                         )
@@ -508,7 +519,7 @@ def complete_developer_flow(driver):
                                         return false;
                                     } catch(e) { return false; }
                                     """
-                                    clicked = driver.execute_script(js_click)
+                                    clicked = browser.execute_script(js_click)
                                     if clicked:
                                         print("Clicked system button in unsupported chain view.")
                                     else:
@@ -544,7 +555,7 @@ def complete_developer_flow(driver):
                                     try:
                                         # Input Client ID
                                         client_id_input_xpath = "/html/body/div/div/div[2]/div[4]/div[1]/div/section/div/div/div[2]/div[2]/div[1]/div[2]/div[1]/div/input"
-                                        client_id_input = WebDriverWait(driver, 30).until(
+                                        client_id_input = WebDriverWait(browser, 30).until(
                                             EC.element_to_be_clickable((By.XPATH, client_id_input_xpath))
                                         )
                                         client_id_input.clear()
@@ -553,7 +564,7 @@ def complete_developer_flow(driver):
 
                                         # Input Client Secret
                                         client_secret_input_xpath = "/html/body/div/div/div[2]/div[4]/div[1]/div/section/div/div/div[2]/div[2]/div[1]/div[2]/div[2]/div/input"
-                                        client_secret_input = WebDriverWait(driver, 30).until(
+                                        client_secret_input = WebDriverWait(browser, 30).until(
                                             EC.element_to_be_clickable((By.XPATH, client_secret_input_xpath))
                                         )
                                         client_secret_input.clear()
@@ -562,18 +573,18 @@ def complete_developer_flow(driver):
 
                                         # Wait for the button to become enabled and click it
                                         submit_btn_xpath = "/html/body/div/div/div[2]/div[4]/div[1]/div/section/div/div/div[2]/div[2]/div[2]/button"
-                                        def button_enabled(driver):
-                                            btn = driver.find_element(By.XPATH, submit_btn_xpath)
+                                        def button_enabled(browser):
+                                            btn = browser.find_element(By.XPATH, submit_btn_xpath)
                                             return btn.is_enabled()
-                                        WebDriverWait(driver, 30).until(button_enabled)
-                                        submit_btn = driver.find_element(By.XPATH, submit_btn_xpath)
+                                        WebDriverWait(browser, 30).until(button_enabled)
+                                        submit_btn = browser.find_element(By.XPATH, submit_btn_xpath)
                                         submit_btn.click()
                                         print("Submit button enabled and clicked.")
 
                                         # Wait for the Authorize app button to become clickable and click it instantly
                                         authorize_btn_xpath = "/html/body/div[1]/div/div/div[2]/main/div/div/div[2]/div/div/div[1]/div[3]/button"
                                         try:
-                                            authorize_btn = WebDriverWait(driver, 120).until(
+                                            authorize_btn = WebDriverWait(browser, 120).until(
                                                 EC.element_to_be_clickable((By.XPATH, authorize_btn_xpath))
                                             )
                                             authorize_btn.click()
@@ -584,7 +595,7 @@ def complete_developer_flow(driver):
                                         # Wait for "10 UXUY" text to appear (can take a long time)
                                         uxuy_xpath = "/html/body/div/div/div[2]/div[4]/div[1]/div/section/div/div/div[2]/div[5]/div[2]/div/strong"
                                         try:
-                                            WebDriverWait(driver, 600).until(
+                                            WebDriverWait(browser, 600).until(
                                                 EC.text_to_be_present_in_element((By.XPATH, uxuy_xpath), "10 UXUY")
                                             )
                                             print('"10 UXUY" text detected.')
@@ -594,7 +605,7 @@ def complete_developer_flow(driver):
                                         # Click on the next element after "10 UXUY" confirmation
                                         next_btn_xpath = "/html/body/div/div/div[2]/div[1]/div/div/div[2]/div[3]/div"
                                         try:
-                                            next_btn = WebDriverWait(driver, 120).until(
+                                            next_btn = WebDriverWait(browser, 120).until(
                                                 EC.element_to_be_clickable((By.XPATH, next_btn_xpath))
                                             )
                                             next_btn.click()
@@ -605,7 +616,7 @@ def complete_developer_flow(driver):
                                         # Wait for and click the final dialog button
                                         dialog_btn_xpath = "/html/body/div[2]/div/div/div/div[2]/div/uxdialog/div/div[1]/div[3]/div"
                                         try:
-                                            dialog_btn = WebDriverWait(driver, 120).until(
+                                            dialog_btn = WebDriverWait(browser, 120).until(
                                                 EC.element_to_be_clickable((By.XPATH, dialog_btn_xpath))
                                             )
                                             dialog_btn.click()
@@ -616,7 +627,7 @@ def complete_developer_flow(driver):
                                         # Wait for "Login" text in the specified element
                                         login_text_xpath = "/html/body/div/div/div[2]/div[1]/div/div/div[2]/div[3]/div/div/div/span[1]"
                                         try:
-                                            WebDriverWait(driver, 120).until(
+                                            WebDriverWait(browser, 120).until(
                                                 EC.text_to_be_present_in_element((By.XPATH, login_text_xpath), "Login")
                                             )
                                             print('"Login" text detected.')
@@ -625,13 +636,13 @@ def complete_developer_flow(driver):
 
                                         # Load the extension connected page
                                         connected_url = "chrome-extension://opfgelmcmbiajamepnmloijbpoleiama/popup.html#/connected"
-                                        driver.get(connected_url)
+                                        browser.get(connected_url)
                                         print("Loaded extension connected page.")
 
                                         # Wait for the button to be available and click it
                                         connect_btn_xpath = "/html/body/div/div/div/div/div[2]/div/div[1]/div/div/div/div[2]/div[2]/div/div/button"
                                         try:
-                                            connect_btn = WebDriverWait(driver, 300).until(
+                                            connect_btn = WebDriverWait(browser, 300).until(
                                                 EC.element_to_be_clickable((By.XPATH, connect_btn_xpath))
                                             )
                                             connect_btn.click()
@@ -642,18 +653,18 @@ def complete_developer_flow(driver):
                                         # Wait for "No connected apps" text in the specified element
                                         no_apps_xpath = "/html/body/div/div/div/div/div[2]/div/div[1]/div/div/div/div[2]/div/div[1]/div/div[2]"
                                         try:
-                                            WebDriverWait(driver, 120).until(
+                                            WebDriverWait(browser, 120).until(
                                                 EC.text_to_be_present_in_element((By.XPATH, no_apps_xpath), "No connected apps")
                                             )
                                             print('"No connected apps" text detected. Opening logout URL and closing browser.')
                                             # Open x.com logout page for logout
                                             try:
-                                                driver.get("https://x.com/logout")
+                                                browser.get("https://x.com/logout")
                                                 print("Opened https://x.com/logout for logout.")
                                                 # Wait for the Log out button to be available and click it
                                                 logout_btn_xpath = "/html/body/div/div/div/div[1]/div[2]/div/div/div/div/div/div[2]/div[2]/div[2]/button[1]"
                                                 try:
-                                                    logout_btn = WebDriverWait(driver, 30).until(
+                                                    logout_btn = WebDriverWait(browser, 30).until(
                                                         EC.element_to_be_clickable((By.XPATH, logout_btn_xpath))
                                                     )
                                                     logout_btn.click()
@@ -663,7 +674,7 @@ def complete_developer_flow(driver):
                                             except Exception as e:
                                                 print(f"Failed to open logout URL: {e}")
                                             time.sleep(2)  # Wait for logout to complete
-                                            driver.quit()
+                                            browser.quit()
                                         except Exception as e:
                                             print(f'"No connected apps" text not found: {e}')
                                     except Exception as e:
@@ -675,7 +686,7 @@ def complete_developer_flow(driver):
                                 print(f"'Sign' button not found or not clickable (attempt {attempt+1}/{max_attempts})")
                                 if attempt == 0:
                                     print("Reloading page and trying again...")
-                                    driver.refresh()
+                                    browser.refresh()
                     except Exception as e:
                         print(f'"Rainbow" option not found or click failed: {e}')
                 except Exception as e:
@@ -687,7 +698,7 @@ def complete_developer_flow(driver):
 
         # Verify completion
         try:
-            WebDriverWait(driver, 10).until(
+            WebDriverWait(browser, 10).until(
                 EC.presence_of_element_located((By.XPATH, "//*[contains(text(), 'success') or contains(text(), 'complete')]"))
             )
             print("Process completed successfully")
@@ -769,7 +780,7 @@ def generate_random_paragraph(min_length=250):
     
     return paragraph.strip()[:min_length + 300]
 
-def open_chrome_instance(driver_path, profile_path, window_index, url=None):
+def open_chrome_instance(browser_path, profile_path, window_index, url=None):
     print(f"Initializing Chrome instance {window_index}...")
     chrome_options = Options()
     chrome_options.add_argument(f"user-data-dir={profile_path}")
@@ -794,7 +805,7 @@ def open_chrome_instance(driver_path, profile_path, window_index, url=None):
     chrome_options.add_argument('--disk-cache-size=1')
     chrome_options.add_argument('--media-cache-size=1')
 
-    service = Service(driver_path)
+    service = Service(browser_path)
     try:
         browser = webdriver.Chrome(service=service, options=chrome_options)
     except Exception as e:
@@ -852,10 +863,10 @@ def open_chrome_instance(driver_path, profile_path, window_index, url=None):
                     print("Browser closed.")
 
                     # Re-open with new key (recursive call)
-                    driver_path = chromedriver_paths[0]
+                    browser_path = chromebrowser_paths[0]
                     profile_path = chrome_profiles[0]
                     url = read_url_from_file("desk/unlocked.txt")
-                    open_chrome_instance(driver_path, profile_path, 0, url)
+                    open_chrome_instance(browser_path, profile_path, 0, url)
                     return  # Exit after re-opening
                 else:
                     print("Developer portal process failed")
@@ -868,10 +879,10 @@ def open_chrome_instance(driver_path, profile_path, window_index, url=None):
     return browser
 
 if __name__ == "__main__":
-    driver_path = chromedriver_paths[0]
+    browser_path = chromebrowser_paths[0]
     profile_path = chrome_profiles[0]
     url = read_url_from_file("desk/unlocked.txt")
-    open_chrome_instance(driver_path, profile_path, 0, url)
+    open_chrome_instance(browser_path, profile_path, 0, url)
 
     # Prevent the script from closing the browser automatically
     input("Press Enter to exit and close the browser...")
